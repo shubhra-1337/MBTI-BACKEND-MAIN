@@ -17,7 +17,6 @@ app.set("trust proxy", true);
 ====================== */
 const allowedOrigins = [
   "https://mbti-frontend-main.vercel.app",
-  "https://knowthyself-7.vercel.app",
   "http://localhost:3000",
   "http://localhost:5173",
   "http://localhost:5500"
