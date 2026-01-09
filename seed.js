@@ -1,6 +1,6 @@
 require("dotenv").config();
 const mongoose = require("mongoose");
-const MBTI = require('./models/mbtiModel');
+const MBTI = require('./mbtiModel');
 
 
 const mbtiSeedData = [
@@ -845,7 +845,7 @@ const mbtiSeedData = [
 
 const seedDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI);
+    await mongoose.connect(process.MONGODB_URI);
     console.log("✅ Connected to MongoDB");
 
     await MBTI.deleteMany({});
