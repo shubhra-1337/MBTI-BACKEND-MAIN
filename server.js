@@ -1,7 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-const path = require("path");
 require("dotenv").config();
 
 const app = express();
@@ -18,10 +17,10 @@ app.set("trust proxy", true);
 ====================== */
 const allowedOrigins = [
   "https://mbti-frontend-main.vercel.app",
-  "http://localhost:5000",
-  "http://localhost:5500",
-  "http://127.0.0.1:5500",
-  "https://knowthyself-7.vercel.app"
+  "https://knowthyself-7.vercel.app",
+  "http://localhost:3000",
+  "http://localhost:5173",
+  "http://localhost:5500"
 ];
 
 app.use(
@@ -37,44 +36,27 @@ app.use(
 );
 
 /* ======================
-   Serve Frontend
+   Routes
 ====================== */
-app.use(
-  express.static(path.join(__dirname, "public", "MBTI-Frontend-main"))
-);
-
-/* ======================
-   API Routes
-====================== */
-const mbtiRoutes = require("./routes/mbtiRoutes");
+const mbtiRoutes = require("./mbtiRoutes");
 app.use("/mbti", mbtiRoutes);
-
-const visitorsRouter = require("./routes/visitors");
-app.use("/api/visitors", visitorsRouter);
 
 /* ======================
    Health Check
 ====================== */
-app.get("/health", (req, res) => {
-  res.json({ status: "Server running 🚀" });
+app.get("/", (req, res) => {
+  res.json({ message: "Backend API running 🚀" });
 });
 
-/* ======================
-   SAFE FALLBACK (Node 22 FIX)
-   ❌ NO wildcards
-====================== */
-app.use((req, res) => {
-  res.sendFile(
-    path.join(__dirname, "public", "MBTI-Frontend-main", "index.html")
-  );
+app.get("/health", (req, res) => {
+  res.json({ status: "Server running 🚀" });
 });
 
 /* ======================
    Start Server
 ====================== */
 const PORT = process.env.PORT || 5000;
-const MONGODB_URI =
-  process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/mbtiDB";
+const MONGODB_URI = process.env.MONGODB_URI;
 
 mongoose
   .connect(MONGODB_URI)
@@ -86,4 +68,5 @@ mongoose
   })
   .catch((err) => {
     console.error("❌ MongoDB error:", err.message);
+    process.exit(1);
   });
