@@ -19,7 +19,7 @@ const allowedOrigins = [
   "https://mbti-frontend-main.vercel.app",
   "http://localhost:3000",
   "http://localhost:5173",
-  "http://localhost:5500"
+  "http://localhost:5500",
 ];
 
 app.use(
@@ -30,7 +30,7 @@ app.use(
       } else {
         callback(new Error("Not allowed by CORS"));
       }
-    }
+    },
   })
 );
 
@@ -54,8 +54,10 @@ app.get("/health", (req, res) => {
 /* ======================
    Start Server
 ====================== */
-const PORT = process.PORT || 5000;
-const MONGODB_URI = process.MONGODB_URI;
+const PORT = process.env.PORT || 5000;
+const MONGODB_URI = process.env.MONGODB_URI;
+
+console.log("Mongo URI loaded:", !!MONGODB_URI); // should log true
 
 mongoose
   .connect(MONGODB_URI)
@@ -69,3 +71,4 @@ mongoose
     console.error("❌ MongoDB error:", err.message);
     process.exit(1);
   });
+
