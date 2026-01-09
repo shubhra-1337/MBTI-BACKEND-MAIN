@@ -11,7 +11,6 @@ router.post("/", async (req, res) => {
       name,
       email,
       age,
-      visitorId: randomUUID(),
     });
 
     await visitor.save();
@@ -19,7 +18,6 @@ router.post("/", async (req, res) => {
     res.status(201).json({
       success: true,
       message: "Visitor created successfully",
-      visitorId: visitor.visitorId
     });
 
   } catch (error) {
