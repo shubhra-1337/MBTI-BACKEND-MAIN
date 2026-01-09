@@ -1,63 +1,16 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const cors = require("cors");
-require("dotenv").config();
 
 const app = express();
 
-/* ======================
-   Middleware
-====================== */
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.set("trust proxy", true);
+const PORT = 5000;
 
-/* ======================
-   CORS
-====================== */
-const allowedOrigins = [
-  "https://mbti-frontend-main.vercel.app",
-  "http://localhost:3000",
-  "http://localhost:5173",
-  "http://localhost:5500",
-];
+// 🔥 HARD-CODED ON PURPOSE TO PROVE EXECUTION
+const MONGODB_URI =
+  "mongodb+srv://shubhra1337:SHUBHRA1337@cluster0.j17wxuq.mongodb.net/mbtiDB?retryWrites=true&w=majority";
 
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-  })
-);
-
-/* ======================
-   Routes
-====================== */
-const mbtiRoutes = require("./mbtiRoutes");
-app.use("/mbti", mbtiRoutes);
-
-/* ======================
-   Health Check
-====================== */
-app.get("/", (req, res) => {
-  res.json({ message: "Backend API running 🚀" });
-});
-
-app.get("/health", (req, res) => {
-  res.json({ status: "Server running 🚀" });
-});
-
-/* ======================
-   Start Server
-====================== */
-const PORT = process.env.PORT || 5000;
-const MONGODB_URI = process.env.MONGODB_URI;
-
-console.log("Mongo URI loaded:", !!MONGODB_URI); // should log true
+console.log("🚨 SERVER FILE IS RUNNING");
+console.log("🚨 URI VALUE:", MONGODB_URI);
 
 mongoose
   .connect(MONGODB_URI)
