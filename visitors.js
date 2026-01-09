@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const Visitor = require("../models/Visitor");
+const Visitor = require("./Visitor");
 const { randomUUID } = require("crypto");
 
 router.post("/", async (req, res) => {
