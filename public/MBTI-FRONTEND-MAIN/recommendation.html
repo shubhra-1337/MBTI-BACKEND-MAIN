@@ -1,0 +1,152 @@
+!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>KnowThySelf | Coordinates</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #00050a;
+            --highlight: #00f2ff; /* Neon Cyan */
+            --contrast: #2979ff;   /* Electric Blue */
+            --text-main: #ffffff;
+            --text-muted: #8ba4b6;
+            
+            --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-shine: rgba(255, 255, 255, 0.15);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Rajdhani', sans-serif; background: var(--bg-dark); color: var(--text-main);
+            min-height: 100vh; padding: 40px 20px; animation: pageFadeIn 1s ease-out; position: relative;
+        }
+        .animated-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2;
+            background: radial-gradient(circle at 50% 50%, #051525 0%, #00050a 100%);
+            background-size: 200% 200%; animation: deepPulse 15s ease infinite alternate;
+        }
+        @keyframes deepPulse { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
+        #particleCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.6; }
+
+        .header-section { text-align: center; margin-bottom: 50px; z-index: 1; position: relative; }
+        h1 { 
+            font-size: clamp(2.5rem, 5vw, 4rem); /* Fluid Heading */
+            color: var(--highlight); text-transform: uppercase; letter-spacing: 3px; 
+            margin-bottom: 10px; font-weight: 700; text-shadow: 0 0 20px rgba(0,242,255,0.4); 
+        }
+        
+        /* RESPONSIVE GRID */
+        #recommendationContent { 
+            display: grid; 
+            /* Automatically fits columns based on available width */
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+            gap: 30px; 
+            max-width: 1200px; margin: 0 auto; min-height: 300px; z-index: 1; position: relative; 
+        }
+        
+        /* GLASS CARDS */
+        .category-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-top: 1px solid var(--glass-shine);
+            border-left: 1px solid var(--glass-shine);
+            
+            border-radius: 15px; padding: 30px;
+            transition: all 0.3s ease; position: relative; overflow: hidden; height: 100%;
+            animation: fadeIn 0.8s ease-out; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .category-card:hover { transform: translateY(-10px); box-shadow: 0 20px 50px rgba(0,242,255,0.15); border-color: var(--highlight); }
+        .category-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: linear-gradient(90deg, transparent, var(--highlight), transparent); box-shadow: 0 0 10px var(--highlight); }
+        
+        .category-card h2 { font-size: 1.8rem; color: #fff; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; font-weight: 700; letter-spacing: 1px; text-shadow: 0 0 10px rgba(0,242,255,0.3); }
+        .category-card ul { list-style: none; }
+        .category-card ul li { 
+            padding: 15px 15px; margin-bottom: 10px; 
+            background: rgba(255,255,255,0.02); 
+            border-radius: 8px; color: #b3c5d1; font-size: 1.2rem; 
+            transition: 0.2s; border-left: 3px solid transparent; font-weight: 500; 
+        }
+        .category-card ul li:hover { background: rgba(0,242,255,0.1); color: var(--highlight); border-left: 3px solid var(--highlight); padding-left: 20px; text-shadow: 0 0 8px rgba(0,242,255,0.4); }
+
+        .nav-buttons { display: flex; justify-content: center; gap: 20px; margin-top: 60px; padding-bottom: 40px; z-index: 1; position: relative; flex-wrap: wrap; }
+        .nav-btn { 
+            background: rgba(255,255,255,0.02); backdrop-filter: blur(10px);
+            color: var(--text-muted); border: 1px solid rgba(255,255,255,0.2); 
+            padding: 12px 35px; border-radius: 30px; cursor: pointer; transition: 0.3s; 
+            font-size: 1.1rem; font-family: 'Rajdhani', sans-serif; text-transform: uppercase; font-weight: 600; letter-spacing: 2px; 
+        }
+        .nav-btn:hover { color: var(--highlight); border-color: var(--highlight); box-shadow: 0 0 15px rgba(0,242,255,0.2); text-shadow: 0 0 8px var(--highlight); background: rgba(0,242,255,0.05); }
+
+        .loading-wrapper { grid-column: 1 / -1; display: flex; justify-content: center; align-items: center; height: 200px; }
+        .simple-loader { font-size: 1.8rem; color: var(--highlight); letter-spacing: 3px; font-weight: 600; animation: pulseText 1.5s infinite ease-in-out; display: flex; align-items: center; gap: 15px; text-transform: uppercase; }
+        .spinner { width: 25px; height: 25px; border: 3px solid rgba(0,242,255,0.3); border-top: 3px solid var(--highlight); border-radius: 50%; animation: spin 1s linear infinite; box-shadow: 0 0 10px var(--highlight); }
+
+        @keyframes pulseText { 0% { opacity: 0.6; text-shadow: 0 0 5px var(--highlight); } 50% { opacity: 1; text-shadow: 0 0 20px var(--highlight); } 100% { opacity: 0.6; text-shadow: 0 0 5px var(--highlight); } }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes pageFadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .fade-out { opacity: 0; transition: opacity 0.5s ease; }
+    </style>
+</head>
+<body>
+    <div class="animated-bg"></div>
+    <canvas id="particleCanvas"></canvas>
+    <div class="header-section">
+        <h1>Curated Recommendations</h1>
+        <p style="color: #b3c5d1; font-size: 1.3rem; font-weight: 500;">Tailored specifically for <span id="displayType" style="color: #00f2ff; font-weight: 700; text-shadow: 0 0 10px var(--highlight);"></span></p>
+    </div>
+    
+    <div id="recommendationContent"></div>
+    
+    <div class="nav-buttons">
+        <button class="nav-btn" onclick="goBack()">Return to Dashboard</button>
+        <button class="nav-btn" onclick="logout()">Terminate Session</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById("particleCanvas"); const ctx = canvas.getContext("2d");
+        let particles = [];
+        function resize(){ canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+        window.addEventListener('resize', resize); resize();
+        class Particle { constructor(){ this.x=Math.random()*canvas.width; this.y=Math.random()*canvas.height; this.vy=Math.random()*0.5+0.3; this.size=Math.random()*2+1; this.op=Math.random()*0.5+0.2; } update(){ this.y+=this.vy; this.x+=Math.sin(this.y*0.01)*0.3; if(this.y>canvas.height){this.y=-10; this.x=Math.random()*canvas.width;} } draw(){ ctx.beginPath(); ctx.arc(this.x,this.y,this.size,0,Math.PI*2); ctx.fillStyle=`rgba(255,255,255,${this.op})`; ctx.fill(); } }
+        for(let i=0;i<100;i++) particles.push(new Particle());
+        function animate(){ ctx.clearRect(0,0,canvas.width,canvas.height); particles.forEach(p=>{p.update();p.draw();}); requestAnimationFrame(animate); }
+        animate();
+
+        const result = localStorage.getItem("mbtiResult");
+        const container = document.getElementById("recommendationContent");
+        document.getElementById("displayType").innerText = result;
+        const API_BASE = (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") ? "http://localhost:5000" : "https://mbti-backend-jp8q.onrender.com";
+
+        if (!result) {
+            container.innerHTML = '<p style="text-align:center; color:#fff;">Data corrupted. Please retake assessment.</p>';
+        } else {
+            container.innerHTML = `<div class="loading-wrapper"><div class="simple-loader"><div class="spinner"></div>Fetching Data for ${result}...</div></div>`;
+            fetch(`${API_BASE}/mbti/${result}`)
+                .then(r => { if (!r.ok) throw new Error("Server communication failed"); return r.json(); })
+                .then(data => displayRecommendations(data, result)) // INSTANT
+                .catch(e => {
+                    console.error("Error fetching data:", e);
+                    container.innerHTML = `<div style="text-align:center; grid-column: 1/-1; padding-top: 50px;"><p style="color:#ff5555; font-size: 1.4rem; font-weight: 600;">⚠ Connection Failed.</p><p style="font-size:1rem; color:#b3e5fc; margin-top: 10px;">Ensure local server is active on port 5000.</p></div>`;
+                });
+        }
+
+        function displayRecommendations(typeData, result) {
+            if (typeData) {
+                container.innerHTML = `
+                    <div class="category-card"><h2>Sonic Resonance (Music)</h2><ul>${(typeData.songs||[]).map(s => `<li>${s}</li>`).join('')}</ul></div>
+                    <div class="category-card"><h2>Knowledge Archives (Books)</h2><ul>${(typeData.books||[]).map(b => `<li>${b}</li>`).join('')}</ul></div>
+                    <div class="category-card"><h2>Career Pathways</h2><ul>${(typeData.careers||[]).map(c => `<li>${c}</li>`).join('')}</ul></div>
+                    <div class="category-card"><h2>Visual Media (Movies)</h2><ul>${(typeData.movies||[]).map(m => `<li>${m}</li>`).join('')}</ul></div>`;
+            } else {
+                container.innerHTML = `<p style="text-align:center; grid-column: 1/-1; color:#fff;">No data found in archives for ${result}.</p>`;
+            }
+        }
+        function goBack() { document.body.classList.add('fade-out'); setTimeout(() => window.location.href = "dashboard.html", 500); }
+        function logout() { localStorage.clear(); document.body.classList.add('fade-out'); setTimeout(() => window.location.href = "index.html", 500); }
+    </script>
+</body>
+</html>
