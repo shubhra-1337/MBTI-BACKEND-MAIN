@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>KnowThySelf | Assessment</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* --- THEME VARIABLES (Cyberpunk) --- */
+            --bg-dark: #00050a;
+            --highlight: #00f2ff; /* Neon Cyan */
+            --contrast: #2979ff;   /* Electric Blue */
+            --text-main: #ffffff;
+            --text-muted: #8ba4b6;
+            
+            /* High Fidelity Glass Variables */
+            --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-shine: rgba(255, 255, 255, 0.15);
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: var(--bg-dark); 
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex; flex-direction: column; align-items: center;
+            overflow-x: hidden; 
+        }
+
+        /* --- BACKGROUND (Particle System) --- */
+        .animated-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2;
+            background: radial-gradient(circle at 50% 50%, #051525 0%, #00050a 100%);
+            background-size: 200% 200%;
+            animation: deepPulse 15s ease infinite alternate;
+        }
+        @keyframes deepPulse { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
+        
+        #particleCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.6; }
+
+        /* --- PROGRESS BAR --- */
+        .progress-container {
+            position: fixed; top: 0; left: 0; width: 100%; height: 4px;
+            background: rgba(255, 255, 255, 0.05); z-index: 100;
+        }
+        .progress-bar {
+            height: 100%; width: 0%;
+            background: var(--highlight);
+            box-shadow: 0 0 15px var(--highlight); transition: width 0.4s ease;
+        }
+
+        /* --- HEADER --- */
+        header { margin-top: 50px; text-align: center; margin-bottom: 30px; padding: 0 20px; z-index: 2; }
+        h1 { 
+            font-size: clamp(2.5rem, 6vw, 4rem); 
+            color: var(--highlight); margin-bottom: 10px;
+            font-weight: 700; text-transform: uppercase;
+            text-shadow: 0 0 25px rgba(0, 242, 255, 0.4); letter-spacing: 2px;
+        }
+        h3 {
+            color: var(--text-muted); font-size: clamp(1rem, 3vw, 1.4rem); font-weight: 500;
+            letter-spacing: 1px; opacity: 0.9;
+        }
+
+        /* --- STRUCTURE (Matches test1.html logic) --- */
+        .glass-box { 
+            width: 95%; max-width: 1255px; 
+            min-height: 500px; height: auto; /* Fluid Height Logic */
+            position: relative;
+            
+            /* Visuals */
+            background: var(--glass-bg);
+            backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            border: 1px solid var(--glass-border);
+            border-top: 1px solid var(--glass-shine);
+            border-left: 1px solid var(--glass-shine);
+            border-radius: 30px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.6);
+            
+            display: flex; flex-direction: column; overflow: hidden; 
+            margin-bottom: 40px; z-index: 2;
+        }
+
+        /* NO ABSOLUTE POSITIONING HERE - This fixes the mobile sizing */
+        .question-card {
+            width: 100%; flex: 1;
+            padding: 40px 50px; 
+            display: none; /* Hidden by default */
+            flex-direction: column; justify-content: center; 
+            opacity: 0; transform: translateX(50px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        .question-card.active { display: flex; opacity: 1; transform: translateX(0); }
+        
+        .q-text {
+            font-size: clamp(1.5rem, 4vw, 2.3rem); 
+            font-weight: 600; color: #fff;
+            border-left: 6px solid var(--highlight); padding-left: 20px; 
+            line-height: 1.3; margin-bottom: 40px; 
+            text-shadow: 0 0 15px rgba(0, 242, 255, 0.3);
+        }
+        
+        /* --- OPTIONS LAYOUT --- */
+        .options-container {
+            display: flex; justify-content: space-between; align-items: center;
+            gap: 15px; width: 100%; flex-wrap: wrap; /* Allows wrapping on phones */
+        }
+        
+        .radio-wrapper { 
+            position: relative; display: flex; justify-content: center; flex: 1; 
+            min-width: 80px; 
+        }
+        input[type="radio"] { display: none; }
+        
+        /* --- BUTTON STYLES (Theme Applied) --- */
+        .radio-wrapper label {
+            width: 100%; height: 65px; border-radius: 35px;
+            background: rgba(255, 255, 255, 0.03); 
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(5px);
+            color: var(--text-muted); 
+            display: flex; justify-content: center; align-items: center;
+            text-align: center; font-size: 1rem; padding: 5px; font-weight: 600;
+            cursor: pointer; transition: all 0.3s ease;
+            user-select: none;
+        }
+        
+        .radio-wrapper label:hover {
+            border-color: var(--highlight); color: #fff;
+            background: rgba(0, 242, 255, 0.15);
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.2);
+            text-shadow: 0 0 8px var(--highlight); transform: translateY(-4px); 
+        }
+
+        input:checked + label {
+            background: linear-gradient(135deg, rgba(41, 121, 255, 0.6), rgba(0, 242, 255, 0.2));
+            border-color: var(--highlight); color: #fff; font-weight: 700;
+            box-shadow: 0 0 30px rgba(0, 242, 255, 0.4); 
+            transform: translateY(-4px);
+        }
+
+        /* --- NAVIGATION --- */
+        .nav-controls {
+            width: 100%; padding: 30px 50px;
+            display: flex; justify-content: space-between; align-items: center; 
+            margin-top: auto;
+        }
+
+        .nav-btn {
+            padding: 12px 30px; border-radius: 50px; font-size: 1rem; 
+            font-weight: 700; text-transform: uppercase; letter-spacing: 2px;
+            cursor: pointer; transition: all 0.3s ease; font-family: 'Rajdhani', sans-serif;
+            display: none; align-items: center; justify-content: center;
+        }
+
+        .btn-outline {
+            background: transparent; color: var(--highlight);
+            border: 2px solid var(--highlight);
+            text-shadow: 0 0 8px rgba(0, 242, 255, 0.4);
+        }
+        .btn-outline:hover { 
+            background: var(--highlight); color: #000;
+            box-shadow: 0 0 25px rgba(0, 242, 255, 0.5); text-shadow: none;
+        }
+
+        .btn-solid {
+            background: var(--highlight); color: #000;
+            border: none; box-shadow: 0 0 20px rgba(0, 242, 255, 0.3);
+        }
+        .btn-solid:hover {
+            background: #fff; box-shadow: 0 0 40px rgba(0, 242, 255, 0.7);
+            transform: translateY(-2px);
+        }
+
+        .nav-btn.visible { display: flex; animation: fadeIn 0.5s ease forwards; }
+
+        footer { margin-top: auto; padding: 20px; color: var(--text-muted); font-size: 1rem; letter-spacing: 1px; opacity: 0.7; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- MOBILE OPTIMIZATIONS (From Test1) --- */
+        @media (max-width: 768px) {
+            .glass-box { border-radius: 20px; min-height: 600px; padding-bottom: 20px; }
+            .question-card { padding: 30px 25px; }
+            
+            /* Force vertical stack on small screens */
+            .options-container { flex-direction: column; gap: 12px; }
+            
+            .radio-wrapper { width: 100%; }
+            .radio-wrapper label { 
+                height: 55px; 
+                justify-content: flex-start; padding-left: 30px; text-align: left; 
+                font-size: 1.1rem;
+            }
+            .nav-controls { padding: 20px 25px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="animated-bg"></div>
+    <canvas id="particleCanvas"></canvas>
+
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+    
+    <header>
+        <h1>Assessment Phase</h1>
+        <h3>Select the option that resonates with your natural state.</h3>
+    </header>
+    
+    <div class="glass-box">
+        <form id="mbtiForm"></form>
+        
+        <div class="nav-controls">
+            <button type="button" id="backBtn" class="nav-btn btn-outline" onclick="prevQuestion()">← Return</button>
+            <div style="flex-grow: 1;"></div>
+            <button type="button" id="submitBtn" class="nav-btn btn-solid" onclick="getResult()">Analyze Data</button>
+        </div>
+    </div>
+    
+    <footer>© 2025 KnowThySelf System</footer>
+
+    <script>
+        // --- PARTICLE SYSTEM ---
+        const canvas = document.getElementById("particleCanvas"); const ctx = canvas.getContext("2d");
+        let particles = [];
+        function resize(){ canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+        window.addEventListener('resize', resize); resize();
+        
+        class Particle { 
+            constructor() { 
+                this.x = Math.random() * canvas.width; 
+                this.y = Math.random() * canvas.height; 
+                this.vy = Math.random() * 0.5 + 0.3; 
+                this.size = Math.random() * 2 + 1; 
+                this.opacity = Math.random() * 0.5 + 0.2; 
+            } 
+            update() { 
+                this.y += this.vy; 
+                this.x += Math.sin(this.y * 0.01) * 0.3; 
+                if(this.y > canvas.height){ this.y = -10; this.x = Math.random() * canvas.width; } 
+            } 
+            draw() { 
+                ctx.beginPath(); 
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); 
+                ctx.fillStyle = `rgba(255,255,255,${this.opacity})`; 
+                ctx.fill(); 
+            } 
+        }
+        for(let j=0; j<100; j++) particles.push(new Particle());
+        function animate(){ ctx.clearRect(0,0,canvas.width,canvas.height); particles.forEach(p=>{p.update();p.draw();}); requestAnimationFrame(animate); }
+        animate();
+
+        // --- QUIZ LOGIC ---
+        const scoring = { "Strongly Disagree": -3, "Disagree": -2, "Slightly Disagree": -1, "Neutral": 0, "Slightly Agree": 1, "Agree": 2, "Strongly Agree": 3 };
+        const questions = [
+            { text: "I feel energized after spending time with a group of people.", dimension: "EI", reverse: false },
+            { text: "I prefer thinking things through alone before sharing my ideas.", dimension: "EI", reverse: true },
+            { text: "I enjoy starting conversations with strangers.", dimension: "EI", reverse: false },
+            { text: "I feel drained after social gatherings, even if fun.", dimension: "EI", reverse: true },
+            { text: "I often speak my thoughts out loud to process them.", dimension: "EI", reverse: false },
+            { text: "I focus on facts and details rather than possibilities.", dimension: "SN", reverse: false },
+            { text: "I enjoy imagining future possibilities more than analyzing the present.", dimension: "SN", reverse: true },
+            { text: "I notice small changes and details in my environment easily.", dimension: "SN", reverse: false },
+            { text: "I often look for patterns or meanings rather than just obvious facts.", dimension: "SN", reverse: true },
+            { text: "I trust practical experience over abstract theories.", dimension: "SN", reverse: false },
+            { text: "I make decisions based on logic rather than personal feelings.", dimension: "TF", reverse: false },
+            { text: "I consider others' emotions when making decisions.", dimension: "TF", reverse: true },
+            { text: "I value fairness and rules over personal relationships.", dimension: "TF", reverse: false },
+            { text: "I often prioritize harmony and compassion over being strictly correct.", dimension: "TF", reverse: true },
+            { text: "I enjoy debating ideas even if it might upset someone.", dimension: "TF", reverse: false },
+            { text: "I prefer to have a detailed plan before starting a project.", dimension: "JP", reverse: false },
+            { text: "I am comfortable leaving things open-ended and going with the flow.", dimension: "JP", reverse: true },
+            { text: "I stick to deadlines and schedules consistently.", dimension: "JP", reverse: false },
+            { text: "I enjoy being spontaneous rather than following a strict plan.", dimension: "JP", reverse: true },
+            { text: "I like finishing tasks ahead of time rather than waiting until the last minute.", dimension: "JP", reverse: false }
+        ];
+
+        // Choices ordered: Strongly Agree (Left) -> Strongly Disagree (Right)
+        const choices = ["Strongly Agree", "Agree", "Slightly Agree", "Neutral", "Slightly Disagree", "Disagree", "Strongly Disagree"];
+        
+        const form = document.getElementById("mbtiForm");
+        let currentStep = 0;
+
+        // Render Questions
+        questions.forEach((q, idx) => {
+            const div = document.createElement("div"); div.className = "question-card"; div.id = `card-${idx}`;
+            div.innerHTML = `<p class="q-text">${idx + 1}. ${q.text}</p>`;
+            const container = document.createElement("div"); container.className = "options-container";
+            
+            choices.forEach(choice => {
+                const wrapper = document.createElement("div"); wrapper.className = "radio-wrapper";
+                // DELAY REMOVED HERE: Removed setTimeout(nextQuestion, 350)
+                wrapper.innerHTML = `<input type="radio" id="q${idx}_${choice.replace(/\s/g, '')}" name="${idx+1}" data-value="${scoring[choice]}" onclick="saveAnswer(${idx}, ${scoring[choice]}); updateProgress(); nextQuestion()">
+                                     <label for="q${idx}_${choice.replace(/\s/g, '')}">${choice.replace(" ", "<br>")}</label>`;
+                container.appendChild(wrapper);
+            });
+            div.appendChild(container); form.appendChild(div);
+        });
+
+        // Initialize First Card
+        window.onload = () => { 
+            restoreAnswers(); // Load answers from storage
+            restoreSession(); // Load page number
+            updateProgress();
+        };
+
+        // --- NEW FUNCTION: SAVE ANSWER TO STORAGE ---
+        function saveAnswer(qIndex, value) {
+            let answers = JSON.parse(localStorage.getItem('mbtiAnswers')) || {};
+            answers[qIndex] = value;
+            localStorage.setItem('mbtiAnswers', JSON.stringify(answers));
+        }
+
+        // --- NEW FUNCTION: RESTORE ANSWERS FROM STORAGE ---
+        function restoreAnswers() {
+            let answers = JSON.parse(localStorage.getItem('mbtiAnswers'));
+            if (!answers) return;
+
+            for (const [qIndex, value] of Object.entries(answers)) {
+                // Find the radio button for this question with this value
+                const radios = document.getElementsByName(parseInt(qIndex) + 1);
+                for (const radio of radios) {
+                    if (parseInt(radio.dataset.value) === parseInt(value)) {
+                        radio.checked = true;
+                    }
+                }
+            }
+        }
+
+        function restoreSession() {
+            const s = parseInt(localStorage.getItem('mbtiStep'));
+            if(!isNaN(s) && s >= 0 && s < questions.length) currentStep = s; else currentStep = 0;
+            
+            document.querySelectorAll('.question-card').forEach(c => c.classList.remove('active'));
+            const curr = document.getElementById(`card-${currentStep}`);
+            if(curr) curr.classList.add('active');
+            
+            updateButtons(); 
+        }
+
+        function nextQuestion() {
+            const curr = document.getElementById(`card-${currentStep}`); 
+            const next = document.getElementById(`card-${currentStep + 1}`);
+            if (next) { 
+                localStorage.setItem('mbtiStep', currentStep + 1);
+                curr.classList.remove('active'); 
+                currentStep++; 
+                next.classList.add('active'); 
+                updateButtons(); 
+            } else { updateButtons(true); }
+        }
+
+        function prevQuestion() {
+            if (currentStep > 0) {
+                const curr = document.getElementById(`card-${currentStep}`); 
+                const prev = document.getElementById(`card-${currentStep - 1}`);
+                localStorage.setItem('mbtiStep', currentStep - 1);
+                curr.classList.remove('active');
+                currentStep--;
+                prev.classList.add('active'); 
+                updateButtons(); 
+            }
+        }
+
+        function updateButtons(isEnd = false) {
+            document.getElementById('backBtn').classList.toggle('visible', currentStep > 0);
+            document.getElementById('submitBtn').classList.toggle('visible', isEnd || currentStep === questions.length - 1);
+        }
+
+        function updateProgress() {
+            const answered = document.querySelectorAll('input[type="radio"]:checked').length;
+            document.getElementById('progressBar').style.width = (answered / questions.length) * 100 + "%";
+        }
+        
+        function getResult() {
+            const scores = { E:0, I:0, S:0, N:0, T:0, F:0, J:0, P:0 };
+            for(let i=0; i<questions.length; i++) {
+                const radios = document.getElementsByName(i+1);
+                let val = null;
+                for (const r of radios) if(r.checked) val = Number(r.dataset.value);
+                
+                if (val === null) { 
+                    alert(`Question ${i+1} incomplete.`); 
+                    document.querySelectorAll('.question-card').forEach(c => c.classList.remove('active'));
+                    document.getElementById(`card-${i}`).classList.add('active');
+                    currentStep = i; 
+                    localStorage.setItem('mbtiStep', i);
+                    updateButtons();
+                    return; 
+                }
+                
+                if(questions[i].reverse) val *= -1;
+                const d = questions[i].dimension;
+                
+                if(d==="EI") val >= 0 ? scores.E += val : scores.I += -val;
+                if(d==="SN") val >= 0 ? scores.S += val : scores.N += -val;
+                if(d==="TF") val >= 0 ? scores.T += val : scores.F += -val;
+                if(d==="JP") val >= 0 ? scores.J += val : scores.P += -val;
+            }
+
+            const calcPct = (a, b) => { const total = a + b; return total === 0 ? 50 : Math.round((a / total) * 100); };
+            const stats = {
+                E: calcPct(scores.E, scores.I), I: calcPct(scores.I, scores.E),
+                S: calcPct(scores.S, scores.N), N: calcPct(scores.N, scores.S),
+                T: calcPct(scores.T, scores.F), F: calcPct(scores.F, scores.T),
+                J: calcPct(scores.J, scores.P), P: calcPct(scores.P, scores.J)
+            };
+
+            const res = (scores.E >= scores.I ? "E" : "I") + (scores.S >= scores.N ? "S" : "N") + (scores.T >= scores.F ? "T" : "F") + (scores.J >= scores.P ? "J" : "P");
+            
+            localStorage.setItem("mbtiResult", res);
+            localStorage.setItem("mbtiStats", JSON.stringify(stats));
+            
+            // Clean up session data
+            localStorage.removeItem("mbtiStep");
+            localStorage.removeItem("mbtiAnswers");
+
+            document.body.classList.add('fade-out');
+            setTimeout(() => window.location.href = "dashboard.html", 500);
+        }
+    </script>
+</body>
+</html>
