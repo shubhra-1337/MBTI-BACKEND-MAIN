@@ -1,11 +1,22 @@
-const express = require("express");
+import express from "express";
+import { randomUUID } from "crypto";
+import Visitor from "../models/Visitor.js";
+
 const router = express.Router();
-const Visitor = require("../models/Visitor");
-const { randomUUID } = require("crypto");
 
 router.post("/", async (req, res) => {
   try {
-    const { name, email, age, meta, url, referrer, device, browser, os } = req.body;
+    const {
+      name,
+      email,
+      age,
+      meta,
+      url,
+      referrer,
+      device,
+      browser,
+      os
+    } = req.body;
 
     const visitor = new Visitor({
       name,
@@ -35,9 +46,13 @@ router.post("/", async (req, res) => {
 
   } catch (error) {
     console.error("visitor POST error:", error);
-    res.status(500).json({ success: false, message: "Internal server error", error: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message
+    });
   }
 });
 
-module.exports = router;
-  
+export default router;
+
