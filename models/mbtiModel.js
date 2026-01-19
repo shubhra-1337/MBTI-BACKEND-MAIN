@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const mbtiSchema = new mongoose.Schema({
   type: {
@@ -12,6 +12,6 @@ const mbtiSchema = new mongoose.Schema({
   movies: [String]
 });
 
-const MBTI = mongoose.model("MBTI", mbtiSchema);
+const MBTI = mongoose.models.MBTI || mongoose.model("MBTI", mbtiSchema);
 
-module.exports = MBTI;
+export default MBTI;
